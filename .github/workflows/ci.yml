@@ -3,7 +3,7 @@ name: Build AWS AMI with Packer
 on:
   push:
     branches:
-      - main  # sau branch-ul tău principal
+      - dev  # sau branch-ul tău principal
 
 jobs:
   build-ami:
