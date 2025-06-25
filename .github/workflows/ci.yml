@@ -20,7 +20,6 @@ jobs:
         uses: hashicorp/setup-packer@v2
 
       - name: Build AMI with Packer and extract AMI ID
-        working-directory: ./packer
         run: |
           packer init .
           packer build -machine-readable wordpress-aws-ubuntu.pkr.hcl | tee output.log
