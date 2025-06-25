@@ -3,7 +3,7 @@ name: Build AWS AMI with Packer
 on:
   push:
     branches:
-      - main # sau branch-ul tău principal
+      - main  # sau branch-ul tău principal
 
 jobs:
   build-ami:
@@ -19,11 +19,11 @@ jobs:
           version: latest
 
       - name: Run `packer init`
-        run: packer init ./packer
+        run: packer init .
 
       - name: Run `packer build`
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: packer build ./packer/wordpress-aws-ubuntu.pkr.hcl
-        
+        run: packer build wordpress-aws-ubuntu.pkr.hcl
+
