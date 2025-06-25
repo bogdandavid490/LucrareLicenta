@@ -8,7 +8,7 @@ packer {
 }
 
 source "amazon-ebs" "ubuntu" {
-  ami_name      = "packer-wordpress-aws"
+  ami_name      = "packer-wordpress-git-aws"
   instance_type = "t3.micro"
   region        = "eu-north-1"
   source_ami_filter {
