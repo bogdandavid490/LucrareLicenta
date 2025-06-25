@@ -1,13 +1,16 @@
-name: Build AWS AMI with Packer
+name: Build AMI with Packer and Deploy with Terraform
 
 on:
   push:
-    branches:
-      - dev  # sau branch-ul tău principal
+    branches: [main]
 
 jobs:
-  build-ami:
+  deploy:
     runs-on: ubuntu-latest
+
+    env:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
     steps:
       - name: Checkout repository
@@ -15,15 +18,24 @@ jobs:
 
       - name: Set up Packer
         uses: hashicorp/setup-packer@v2
+
+      - name: Build AMI with Packer and extract AMI ID
+        working-directory: ./packer
+        run: |
+          packer init .
+          packer build -machine-readable wordpress-aws-ubuntu.pkr.hcl | tee output.log
+          AMI_ID=$(grep 'artifact,0,id' output.log | cut -d, -f6 | cut -d: -f2)
+          echo "AMI_ID=$AMI_ID" >> $GITHUB_ENV
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
         with:
-          version: latest
+          terraform_version: 1.6.2
 
-      - name: Run `packer init`
-        run: packer init .
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
 
-      - name: Run `packer build`
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: packer build wordpress-aws-ubuntu.pkr.hcl
-
+      - name: Terraform Apply (with AMI ID from Packer)
+        working-directory: ./terraform
+        run: terraform apply -auto-approve -var="ami_id=${{ env.AMI_ID }}"
